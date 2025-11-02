@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  vpnbot:
+    build: .
+    container_name: vpnbot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

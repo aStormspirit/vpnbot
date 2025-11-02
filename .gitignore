@@ -9,8 +9,8 @@ __pycache__/
 *$py.class
 
 # Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+poetry.lock
+.env
 
 # Unit test / coverage reports
 htmlcov/

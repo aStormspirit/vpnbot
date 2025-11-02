@@ -1,0 +1,83 @@
+[tool.poetry]
+name = "auronvpn-bot"
+version = "0.1.0"
+description = "Telegram бот для VPN сервиса AuronVPN"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "*.py"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = "^3.7.0"
+python-dotenv = "^1.2.1"
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "^3.13.0"
+pytest = "^8.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+version_files = [
+    "pyproject.toml:version"
+]
+update_changelog_on_bump = true
+major_version_zero = true
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}: {{message}}"
+example = "feat(bot): добавить обработку платежей"
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+"""
+schema_pattern = "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(\\w+\\))?!?: .{1,100}"
+bump_pattern = "^(feat|fix|refactor|perf)"
+bump_map = {"feat" = "MINOR", "fix" = "PATCH", "refactor" = "PATCH", "perf" = "PATCH"}
+change_type_order = ["feat", "fix", "refactor", "perf", "docs", "style", "test", "build", "ci", "chore"]
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+message = "Выберите тип изменения:"
+choices = [
+    {value = "feat", name = "feat: Новая функциональность"},
+    {value = "fix", name = "fix: Исправление ошибки"},
+    {value = "docs", name = "docs: Документация"},
+    {value = "style", name = "style: Форматирование кода"},
+    {value = "refactor", name = "refactor: Рефакторинг"},
+    {value = "perf", name = "perf: Улучшение производительности"},
+    {value = "test", name = "test: Добавление тестов"},
+    {value = "build", name = "build: Сборка и зависимости"},
+    {value = "ci", name = "ci: CI/CD конфигурация"},
+    {value = "chore", name = "chore: Рутинные задачи"},
+    {value = "revert", name = "revert: Откат изменений"}
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "scope"
+message = "Область изменения (опционально, например: bot, api, ui):"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Краткое описание изменения:"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Подробное описание (опционально):"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "Footer (опционально, например: Closes #123):"

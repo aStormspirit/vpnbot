@@ -6,8 +6,13 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # reads variables from a .env file and sets them in os.environ
+
 # Настройки
-BOT_TOKEN = "7700574471:AAE60UDm3-mvorrEWIt35tGoZGW4JX7roi0"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Инициализация бота и диспетчера
 logging.basicConfig(level=logging.INFO)
