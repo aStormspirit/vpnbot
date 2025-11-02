@@ -53,6 +53,13 @@ back_keyboard = InlineKeyboardMarkup(
     ]
 )
 
+buy_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Proxy", callback_data="chat")],
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_menu")]
+    ]
+)
+
 # ==================== ТЕКСТ ====================
 GREETING_TEXT = (
     "👋 <b>Добро пожаловать в AuronVPN</b>\n\n"
@@ -73,6 +80,11 @@ RULES_TEXT = (
 HELPERS_TEXT = (
     "<b>Помощь</b>\n\n"
     "Прежде чем писать в поддержку, изучите базу знаний (https://myvless.com), если вашей проблемы там нет или у вас просто есть вопрос - обращайтесь в поддержку."
+)
+
+BUY_TEXT = (
+    "<b>Выберите услугу</b>\n\n"
+    ""
 )
 
 
@@ -97,7 +109,7 @@ async def back_to_menu(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "buy_vpn")
 async def back_to_menu(callback: types.CallbackQuery):
-    await callback.message.edit_text(GREETING_TEXT, reply_markup=keyboard)
+    await callback.message.edit_text(BUY_TEXT, reply_markup=buy_keyboard)
     await callback.answer()
 
 @dp.callback_query(F.data == "help")
