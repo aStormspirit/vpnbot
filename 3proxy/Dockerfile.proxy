@@ -1,0 +1,20 @@
+FROM alpine:latest
+
+# Установка зависимостей
+RUN apk update && \
+    apk add --no-cache \
+    build-base \
+    wget \
+    tar && \
+    rm -rf /var/cache/apk/*
+
+# Скачивание и установка 3proxy
+RUN wget https://github.com/z3APA3A/3proxy/archive/0.9.4.tar.gz && \
+    tar xzf 0.9.4.tar.gz && \
+    cd 3proxy-0.9.4 && \
+    make -f Makefile.Linux && \
+    mkdir -p /etc/3proxy && \
+    cd bin && \
+    cp 3proxy /usr/bin/ && \
+    cd / && \
+    rm -rf 3proxy-0.9.4 0.9.4.tar.gz
