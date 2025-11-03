@@ -1,16 +1,59 @@
 version: '3.8'
 
 services:
-  vpnbot:
-    build: .
+  # Контейнер с 3proxy
+  # proxy:
+  #   build:
+  #     context: ./3proxy
+  #     dockerfile: Dockerfile.proxy  # Или Dockerfile.proxy.alpine для Alpine версии
+  #   container_name: vpn_3proxy
+  #   restart: unless-stopped
+  #   volumes:
+  #     # Общие volumes для конфигурации и паролей
+  #     - proxy_config:/etc/3proxy
+  #     - proxy_logs:/var/log/3proxy
+  #   ports:
+  #     # Открываем диапазон портов для прокси
+  #     - "10000-10100:10000-10100"
+  #   networks:
+  #     - vpn_network
+  #   healthcheck:
+  #     test: ["CMD", "pgrep", "3proxy"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+  # Контейнер с ботом
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
     container_name: vpnbot
     restart: unless-stopped
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
+    # environment:
+      # - PROXY_HOST=proxy
+      # - PROXY_CONFIG_PATH=/etc/3proxy
     volumes:
       - ./data:/app/data
+      # Общие volumes для управления 3proxy
+      # - proxy_config:/etc/3proxy
+      # - proxy_logs:/var/log/3proxy
+    networks:
+      - vpn_network
+    # depends_on:
+    #   - proxy
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  proxy_config:
+    driver: local
+  proxy_logs:
+    driver: local
+
+networks:
+  vpn_network:
+    driver: bridge
