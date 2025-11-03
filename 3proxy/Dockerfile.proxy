@@ -13,8 +13,21 @@ RUN wget https://github.com/z3APA3A/3proxy/archive/0.9.4.tar.gz && \
     tar xzf 0.9.4.tar.gz && \
     cd 3proxy-0.9.4 && \
     make -f Makefile.Linux && \
-    mkdir -p /etc/3proxy && \
+    mkdir -p /etc/3proxy /var/log/3proxy && \
     cd bin && \
     cp 3proxy /usr/bin/ && \
     cd / && \
     rm -rf 3proxy-0.9.4 0.9.4.tar.gz
+
+# Копирование конфигурации
+COPY 3proxy.cfg /etc/3proxy/3proxy.cfg
+COPY passwd /etc/3proxy/passwd
+
+# Установка прав
+RUN chmod 600 /etc/3proxy/passwd
+
+# Открываем порт для SOCKS5
+EXPOSE 1080
+
+# Запуск 3proxy
+CMD ["/usr/bin/3proxy", "/etc/3proxy/3proxy.cfg"]
