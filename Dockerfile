@@ -16,7 +16,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi --no-root --only main
 
 # Копируем все файлы проекта
-COPY . .
+COPY ./bot .
 
 # Запускаем бота
 CMD ["python", "main.py"]

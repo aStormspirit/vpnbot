@@ -26,7 +26,7 @@ services:
   # Контейнер с ботом
   bot:
     build:
-      context: ./bot
+      context: .
       dockerfile: Dockerfile
     container_name: vpnbot
     restart: unless-stopped
