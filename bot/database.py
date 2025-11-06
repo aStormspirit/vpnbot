@@ -15,7 +15,8 @@ class Database:
     async def init_db(self):
         """Инициализация базы данных и создание таблиц"""
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS users (
                     user_id INTEGER PRIMARY KEY,
                     username TEXT,
@@ -27,7 +28,8 @@ class Database:
                     subscription_end TIMESTAMP NULL,
                     total_traffic INTEGER DEFAULT 0
                 )
-            """)
+            """
+            )
             await db.commit()
             logger.info("База данных инициализирована")
 
@@ -36,7 +38,7 @@ class Database:
         user_id: int,
         username: Optional[str] = None,
         first_name: Optional[str] = None,
-        last_name: Optional[str] = None
+        last_name: Optional[str] = None,
     ) -> bool:
         """Добавление нового пользователя"""
         try:
@@ -51,7 +53,7 @@ class Database:
                         last_name = excluded.last_name,
                         last_active = CURRENT_TIMESTAMP
                     """,
-                    (user_id, username, first_name, last_name)
+                    (user_id, username, first_name, last_name),
                 )
                 await db.commit()
                 logger.info(f"Пользователь {user_id} добавлен/обновлен")
@@ -66,8 +68,7 @@ class Database:
             async with aiosqlite.connect(self.db_path) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
-                    "SELECT * FROM users WHERE user_id = ?",
-                    (user_id,)
+                    "SELECT * FROM users WHERE user_id = ?", (user_id,)
                 ) as cursor:
                     row = await cursor.fetchone()
                     if row:
@@ -83,7 +84,7 @@ class Database:
             async with aiosqlite.connect(self.db_path) as db:
                 await db.execute(
                     "UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE user_id = ?",
-                    (user_id,)
+                    (user_id,),
                 )
                 await db.commit()
         except Exception as e:
@@ -111,7 +112,7 @@ class Database:
             async with aiosqlite.connect(self.db_path) as db:
                 await db.execute(
                     "UPDATE users SET subscription_end = ? WHERE user_id = ?",
-                    (end_date, user_id)
+                    (end_date, user_id),
                 )
                 await db.commit()
                 logger.info(f"Подписка пользователя {user_id} обновлена")

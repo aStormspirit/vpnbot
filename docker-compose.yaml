@@ -2,26 +2,29 @@ version: '3.8'
 
 services:
   # Контейнер с 3proxy
-  # proxy:
-  #   build:
-  #     context: ./3proxy
-  #     dockerfile: Dockerfile.proxy  # Или Dockerfile.proxy.alpine для Alpine версии
-  #   container_name: vpn_3proxy
-  #   restart: unless-stopped
-  #   volumes:
-  #     # Общие volumes для конфигурации и паролей
-  #     - proxy_config:/etc/3proxy
-  #     - proxy_logs:/var/log/3proxy
-  #   ports:
-  #     # Открываем диапазон портов для прокси
-  #     - "10000-10100:10000-10100"
-  #   networks:
-  #     - vpn_network
-  #   healthcheck:
-  #     test: ["CMD", "pgrep", "3proxy"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
+  proxy:
+    build:
+      context: ./3proxy
+      dockerfile: Dockerfile  # Или Dockerfile.proxy.alpine для Alpine версии
+    container_name: vpn_3proxy
+    restart: unless-stopped
+    volumes:
+      # Общие volumes для конфигурации и паролей
+      - proxy_config:/etc/3proxy
+      - proxy_logs:/var/log/3proxy
+    ports:
+      # Основные порты прокси
+      - "1080:1080"   # SOCKS5
+      - "3128:3128"   # HTTP
+      # Открываем диапазон портов для прокси
+      # - "10000-10100:10000-10100"
+    networks:
+      - vpn_network
+    healthcheck:
+      test: ["CMD", "pgrep", "3proxy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Контейнер с ботом
   bot:
@@ -30,23 +33,33 @@ services:
       dockerfile: Dockerfile
     container_name: vpnbot
     restart: unless-stopped
-    # environment:
-      # - PROXY_HOST=proxy
-      # - PROXY_CONFIG_PATH=/etc/3proxy
+    environment:
+      - PROXY_HOST=proxy
+      - PROXY_CONFIG_PATH=/etc/3proxy
     volumes:
       - ./data:/app/data
       # Общие volumes для управления 3proxy
-      # - proxy_config:/etc/3proxy
-      # - proxy_logs:/var/log/3proxy
+      - proxy_config:/etc/3proxy
+      - proxy_logs:/var/log/3proxy
     networks:
       - vpn_network
-    # depends_on:
-    #   - proxy
+    depends_on:
+      - proxy
+      - redis
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+  redis:
+    image: redis:alpine
+    container_name: vpn_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - vpn_network
 
 volumes:
   proxy_config:

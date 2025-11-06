@@ -19,7 +19,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Инициализация бота и диспетчера
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(
+    token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 # ==================== КЛАВИАТУРА ====================
@@ -27,12 +29,12 @@ keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text="💳 Купить VPN", callback_data="buy_vpn"),
-            InlineKeyboardButton(text="👤 Профиль", callback_data="profile")
+            InlineKeyboardButton(text="👤 Профиль", callback_data="profile"),
         ],
         [
             InlineKeyboardButton(text="📋 Правила", callback_data="rules"),
-            InlineKeyboardButton(text="❓ Помощь", callback_data="help")
-        ]
+            InlineKeyboardButton(text="❓ Помощь", callback_data="help"),
+        ],
     ]
 )
 
@@ -45,14 +47,14 @@ back_keyboard = InlineKeyboardMarkup(
 help_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="💬 Чат поддержки", callback_data="chat")],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_menu")]
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_menu")],
     ]
 )
 
 buy_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Proxy", callback_data="proxy")],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_menu")]
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_menu")],
     ]
 )
 
@@ -79,32 +81,39 @@ HELPERS_TEXT = (
     "если вашей проблемы там нет или у вас просто есть вопрос - обращайтесь в поддержку."
 )
 
-BUY_TEXT = (
-    "<b>💳 Выберите услугу</b>\n\n"
-    "Доступные варианты для покупки:"
-)
+BUY_TEXT = "<b>💳 Выберите услугу</b>\n\n" "Доступные варианты для покупки:"
 
 
 def format_profile_text(user_data: dict) -> str:
     """Форматирование текста профиля"""
-    user_id = user_data['user_id']
-    username = f"@{user_data['username']}" if user_data['username'] else "Не указан"
-    first_name = user_data['first_name'] or "Не указано"
-    created_at = datetime.fromisoformat(user_data['created_at']).strftime("%d.%m.%Y %H:%M")
-    
+    user_id = user_data["user_id"]
+    username = (
+        f"@{user_data['username']}" if user_data["username"] else "Не указан"
+    )
+    first_name = user_data["first_name"] or "Не указано"
+    created_at = datetime.fromisoformat(user_data["created_at"]).strftime(
+        "%d.%m.%Y %H:%M"
+    )
+
     # Проверка подписки
-    if user_data['subscription_end']:
-        sub_end = datetime.fromisoformat(user_data['subscription_end'])
+    if user_data["subscription_end"]:
+        sub_end = datetime.fromisoformat(user_data["subscription_end"])
         if sub_end > datetime.now():
-            subscription_status = f"✅ Активна до {sub_end.strftime('%d.%m.%Y %H:%M')}"
+            subscription_status = (
+                f"✅ Активна до {sub_end.strftime('%d.%m.%Y %H:%M')}"
+            )
         else:
             subscription_status = "❌ Истекла"
     else:
         subscription_status = "❌ Не активна"
-    
+
     # Форматирование трафика
-    traffic_gb = user_data['total_traffic'] / (1024 ** 3) if user_data['total_traffic'] else 0
-    
+    traffic_gb = (
+        user_data["total_traffic"] / (1024**3)
+        if user_data["total_traffic"]
+        else 0
+    )
+
     return (
         f"👤 <b>Ваш профиль</b>\n\n"
         f"🆔 ID: <code>{user_id}</code>\n"
@@ -121,26 +130,28 @@ def format_profile_text(user_data: dict) -> str:
 async def track_user_activity(handler, event: types.Message, data: dict):
     """Middleware для отслеживания активности пользователей"""
     user = event.from_user
-    
+
     # Проверяем, новый ли пользователь
     is_new = await db.is_new_user(user.id)
-    
+
     # Добавляем/обновляем пользователя
     await db.add_user(
         user_id=user.id,
         username=user.username,
         first_name=user.first_name,
-        last_name=user.last_name
+        last_name=user.last_name,
     )
-    
+
     # Обновляем время последней активности
     await db.update_last_active(user.id)
-    
+
     return await handler(event, data)
 
 
 @dp.callback_query.middleware()
-async def track_callback_activity(handler, event: types.CallbackQuery, data: dict):
+async def track_callback_activity(
+    handler, event: types.CallbackQuery, data: dict
+):
     """Middleware для отслеживания активности через callback"""
     user = event.from_user
     await db.update_last_active(user.id)
@@ -157,16 +168,18 @@ async def cmd_start(message: types.Message):
 @dp.callback_query(F.data == "profile")
 async def show_profile(callback: types.CallbackQuery):
     user_data = await db.get_user(callback.from_user.id)
-    
+
     if user_data:
         profile_text = format_profile_text(user_data)
-        await callback.message.edit_text(profile_text, reply_markup=back_keyboard)
+        await callback.message.edit_text(
+            profile_text, reply_markup=back_keyboard
+        )
     else:
         await callback.message.edit_text(
             "❌ Ошибка загрузки профиля. Попробуйте позже.",
-            reply_markup=back_keyboard
+            reply_markup=back_keyboard,
         )
-    
+
     await callback.answer()
 
 
@@ -197,8 +210,7 @@ async def help_handler(callback: types.CallbackQuery):
 @dp.callback_query(F.data == "chat")
 async def chat_support(callback: types.CallbackQuery):
     await callback.answer(
-        "Напишите в поддержку: @support_username",
-        show_alert=True
+        "Напишите в поддержку: @support_username", show_alert=True
     )
 
 
@@ -208,13 +220,13 @@ async def cmd_stats(message: types.Message):
     # Здесь можно добавить проверку на админа
     total_users = await db.get_user_count()
     active_subs = await db.get_active_subscriptions_count()
-    
+
     stats_text = (
         f"📊 <b>Статистика бота</b>\n\n"
         f"👥 Всего пользователей: {total_users}\n"
         f"✅ Активных подписок: {active_subs}"
     )
-    
+
     await message.answer(stats_text)
 
 
