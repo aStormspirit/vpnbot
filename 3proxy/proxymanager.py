@@ -96,14 +96,13 @@ class ProxyManager:
         try:
             import subprocess
             
-            # Отправляем сигнал HUP для перезагрузки конфигурации
             result = subprocess.run(
                 ["pkill", "-HUP", "3proxy"],
                 capture_output=True,
                 text=True
             )
             
-            if result.returncode == 0:
+            if kill.returncode == 0:
                 logger.info("Конфигурация 3proxy перезагружена")
                 return True
             else:

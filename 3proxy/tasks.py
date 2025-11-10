@@ -1,14 +1,16 @@
+import asyncio
 import logging
 import os
 
 from celery import Celery
+from .proxymanager import ProxyManager
 
 # Настройка логирования
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-logger = logging.getLogger("selenium_tasks")
+logger = logging.getLogger("3proxy")
 
 # Настройка Celery
 CELERY_BROKER_URL = os.environ.get(
@@ -19,7 +21,7 @@ CELERY_RESULT_BACKEND = os.environ.get(
 )
 
 celery_app = Celery(
-    "selenium_tasks", broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND
+    "3proxy", broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND
 )
 
 celery_app.conf.update(
@@ -33,9 +35,30 @@ celery_app.conf.update(
     task_max_retries=3,
 )
 
+proxymanager = ProxyManager()
+
 
 @celery_app.task(bind=True)
-def create_proxy(
+def create_proxy_credentials(
     self,
 ) -> None:
-    pass
+    """Создание учетных данных для прокси"""
+    # Генерируем учетные данные
+    credentials = proxymanager.generate_credentials()
+    
+    # Выполняем асинхронные операции в синхронном контексте
+    async def _create_and_reload():
+        await proxymanager.create_proxy_user(
+            credentials["login"], 
+            credentials["password"]
+        )
+        await proxymanager.reload_proxy_config()
+    
+    # Запускаем асинхронный код
+    asyncio.run(_create_and_reload())
+
+    return {
+            "status": "success",
+            "login": credentials["login"],
+            "password": credentials["password"]
+        }

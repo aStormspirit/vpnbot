@@ -39,6 +39,8 @@ echo "3proxy успешно запущен (PID: $PROXY_PID)"
 echo "SOCKS5 прокси доступен на порту 1080"
 echo "HTTP прокси доступен на порту 3128"
 
+celery -A app.tasks worker -n worker1 -l info -E
+
 # Держим контейнер запущенным и следим за процессом
 while kill -0 $PROXY_PID 2>/dev/null; do
     sleep 1

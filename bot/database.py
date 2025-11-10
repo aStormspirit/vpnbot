@@ -30,6 +30,27 @@ class Database:
                 )
             """
             )
+
+                        # Таблица прокси-учетных данных
+            await db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS proxy_credentials (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    proxy_login TEXT NOT NULL,
+                    proxy_password TEXT NOT NULL,
+                    proxy_type TEXT DEFAULT 'socks5',
+                    proxy_host TEXT,
+                    proxy_port INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP NULL,
+                    is_active BOOLEAN DEFAULT 1,
+                    FOREIGN KEY (user_id) REFERENCES users (user_id),
+                    UNIQUE(proxy_login)
+                )
+            """
+            )
+            
             await db.commit()
             logger.info("База данных инициализирована")
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Контейнер с 3proxy
   proxy:
@@ -8,6 +6,9 @@ services:
       dockerfile: Dockerfile  # Или Dockerfile.proxy.alpine для Alpine версии
     container_name: vpn_3proxy
     restart: unless-stopped
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
     volumes:
       # Общие volumes для конфигурации и паролей
       - proxy_config:/etc/3proxy
@@ -20,6 +21,7 @@ services:
       # - "10000-10100:10000-10100"
     networks:
       - vpn_network
+    
     healthcheck:
       test: ["CMD", "pgrep", "3proxy"]
       interval: 30s
@@ -34,8 +36,10 @@ services:
     container_name: vpnbot
     restart: unless-stopped
     environment:
-      - PROXY_HOST=proxy
-      - PROXY_CONFIG_PATH=/etc/3proxy
+      # PROXY_HOSTproxy
+      # PROXY_CONFIG_PATH=/etc/3proxy
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
     volumes:
       - ./data:/app/data
       # Общие volumes для управления 3proxy

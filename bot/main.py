@@ -6,11 +6,14 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from datetime import datetime
+from worker import celery
 
 from dotenv import load_dotenv
 import os
 
 from database import db
+from celery.result import AsyncResult
+
 
 load_dotenv()
 
@@ -212,6 +215,17 @@ async def chat_support(callback: types.CallbackQuery):
     await callback.answer(
         "Напишите в поддержку: @support_username", show_alert=True
     )
+
+@dp.callback_query(F.data == "proxy")
+async def chat_support(callback: types.CallbackQuery):
+    await callback.answer("⏳ Создание прокси... Пожалуйста, подождите...", show_alert=False)
+    result = celery.send_task("app.tasks.create_proxy_credentials")
+    proxy = result.get(timeout=30)
+    await callback.message.answer(
+        "✅ <b>Прокси успешно создан!</b>\n\n" +
+        f"http://151.241.226.127:1080:{proxy['login']}:{proxy['password']}\n"
+    )
+
 
 
 # ==================== КОМАНДА ДЛЯ СТАТИСТИКИ (для админа) ====================
