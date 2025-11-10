@@ -223,7 +223,7 @@ async def chat_support(callback: types.CallbackQuery):
     proxy = result.get(timeout=30)
     await callback.message.answer(
         "✅ <b>Прокси успешно создан!</b>\n\n" +
-        f"http://151.241.226.127:1080:{proxy['login']}:{proxy['password']}\n"
+        f"http://{proxy['login']}:{proxy['password']}@151.241.226.127:3182\n"
     )
 
 
