@@ -32,7 +32,7 @@ class ProxyManager:
         
         # Генерируем случайный пароль (16 символов)
         password = ''.join(
-            secrets.choice(string.ascii_letters + string.digits + string.punctuation) 
+            secrets.choice(string.ascii_letters + string.digits) 
             for _ in range(16)
         )
         
